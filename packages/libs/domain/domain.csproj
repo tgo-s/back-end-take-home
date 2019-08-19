@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <RootNamespace>Guestlogix.SkyRoutes.Domain</RootNamespace>  
+    <Authors>Thiago</Authors>
+    <Company>Guestlogix</Company>
+    <AssemblyName>Guestlogix.SkyRoutes.Domain</AssemblyName>
+    <PackageId>Guestlogix.SkyRoutes.Domain</PackageId>    
+  </PropertyGroup>
+
+</Project>

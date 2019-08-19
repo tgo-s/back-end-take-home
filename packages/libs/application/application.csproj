@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <RootNamespace>Guestlogix.SkyRoutes.Application</RootNamespace>  
+    <Authors>Thiago</Authors>
+    <Company>Guestlogix</Company>
+    <AssemblyName>Guestlogix.SkyRoutes.Application</AssemblyName>
+    <PackageId>Guestlogix.SkyRoutes.Application</PackageId>    
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Geolocation.NetStandard" Version="1.1.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\persistence\persistence.csproj" />
+  </ItemGroup>
+
+</Project>
