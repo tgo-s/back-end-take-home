@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Guestlogix.SkyRoutes.Application.Comparer;
 using Guestlogix.SkyRoutes.Domain;
 using Guestlogix.SkyRoutes.Persistence.Interfaces;
 
@@ -24,46 +25,55 @@ namespace Guestlogix.SkyRoutes.Application.Logic
 
             Airport originAirport = airports.Single(a => a.IATA.Trim().ToLower().Equals(origin.Trim().ToLower()));
             Airport destinationAirport = airports.Single(a => a.IATA.Trim().ToLower().Equals(destination.Trim().ToLower()));
-            List<Airport> visited = new List<Airport>();
-            List<Airport> connections = new List<Airport>();
-            
-            connections.Add(originAirport);
 
-            RecursiveSearch(originAirport, destinationAirport, airports, visited, connections);
+            SearchShortestPath(originAirport, destinationAirport, airports);
+            var shortestPath = new List<Airport>();
+            shortestPath.Add(destinationAirport);
+            BuildShortestPath(shortestPath, destinationAirport);
+            shortestPath.Reverse();
 
-            return connections;
+            return shortestPath;
         }
 
-        private void RecursiveSearch(Airport origin, Airport destination, List<Airport> airports, List<Airport> visited, List<Airport> connections)
+        public void SearchShortestPath(Airport originAiport, Airport destinationAirport, List<Airport> airports)
         {
-            if (!origin.Routes.Any(r => r.Destination.Equals(destination.IATA)))
+            originAiport.StartCost = 0;
+            var queue = new List<Airport>();
+            queue.Add(originAiport);
+            do
             {
-                visited.Add(origin);
-
-                foreach (var item in origin.Routes)
+                queue = queue.OrderBy(x => x.StartCost).ToList();
+                var airport = queue.First();
+                queue.Remove(airport);
+                foreach (var route in airport.Routes.Distinct(new RouteComparer()).OrderBy(x => x.Cost))
                 {
-                    var newOrigin = airports.Where(a => !visited.Any(v => v.Equals(a))).SingleOrDefault(a => a.IATA.Equals(item.Destination));
+                    route.Cost += 1;
+                    var newOrigin = airports.SingleOrDefault(a => a.IATA.Equals(route.Destination));
 
-                    if(newOrigin == null)
+                    if (newOrigin.Visited)
                         continue;
 
-                    connections.Add(newOrigin);
-
-                    RecursiveSearch(newOrigin, destination, airports, visited, connections);
-
-                    if(connections.Any(c => c.Equals(destination)))
+                    if (newOrigin.StartCost == 0 ||
+                        airport.StartCost + route.Cost < newOrigin.StartCost)
                     {
-                        break;
+                        newOrigin.StartCost = airport.StartCost + route.Cost;
+                        newOrigin.LastConnection = airport;
+                        if (!queue.Contains(newOrigin))
+                            queue.Add(newOrigin);
                     }
                 }
-            }
-            else
-            {
-                connections.Add(destination);
-                return;
-            }
+                airport.Visited = true;
+                if (airport.Equals(destinationAirport))
+                    return;
+            } while (queue.Any());
         }
-
+        private void BuildShortestPath(List<Airport> shortestPath, Airport airport)
+        {
+            if (airport.LastConnection == null)
+                return;
+            shortestPath.Add(airport.LastConnection);
+            BuildShortestPath(shortestPath, airport.LastConnection);
+        }
         private IEnumerable<Airport> LoadAirports()
         {
             try
